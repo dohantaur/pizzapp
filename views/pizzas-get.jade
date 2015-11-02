@@ -8,7 +8,9 @@ block content
       each pizza in pizzas
         li.list-group-item
           div.row
-            div.col-lg-10
+            div.col-lg-4
+              img(src='/public/' + pizza.name.toLowerCase() + '.jpg')
+            div.col-lg-6
               h4= '#' + pizza.id  + ': ' + pizza.name
             div.col-lg-2
               form(action='/orders', method='POST')
