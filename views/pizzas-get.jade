@@ -1,13 +1,11 @@
-doctype html
-html(lang="en")
-  head
-    title Pizza App!
-  body
-    h1 GET ALL PIZZA
-    ul
+extends ./layout.jade
+
+block content
+    h1 NOS PIZZAS
+    ul.list-group
       each pizza in data
-        li
-          div= pizza.id  + ' : ' + pizza.name
-          form(action='/orders', method='POST')
-            input(type='hidden', value=pizza.id, name='id', id='id')
-            input(type='submit', value='commander')
+        li.list-group-item
+          div= '#' + pizza.id  + ': ' + pizza.name
+            form(action='/orders', method='POST')
+              input(type='hidden', value=pizza.id, name='id', id='id')
+              input(type='submit', value='commander', class='btn btn-primary')

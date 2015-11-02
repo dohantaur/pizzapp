@@ -1,8 +1,6 @@
-doctype html
-html(lang="en")
-  head
-    title Pizza App!
-  body
+extends ./layout.jade
+
+block content
     h1= 'ORDER #' + order.id
 
     div= 'Pizza: ' + order.pizza.name + ' (id:' + order.pizza.id + ')'
