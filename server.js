@@ -7,6 +7,7 @@ var redis = require('redis');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
@@ -20,7 +21,7 @@ app.get('/pizzas', (req, res) => {
 	var timeout = setTimeout( () => {
   		client.end();
     }, 4000);
-    
+
     client.get("pizzas", (err, reply) => {
   		console.log('PIZZAS FROM REDIS:');
         var pizzas = JSON.parse(reply);
