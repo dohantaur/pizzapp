@@ -33,12 +33,13 @@ app.get('/orders/:id', (req, res) => {
 });
 
 app.post('/orders', (req, res) => {
-  console.log('TA MERE');
+  console.log('-------');
   console.log(req.body);
-  console.log('--------');
-  request.post('http://pizzapi.herokuapp.com/orders', req.body ,(err, result, body ) => {
+  console.log('-------');
+  request.post({url: 'http://pizzapi.herokuapp.com/orders', body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
     if(err) return res.send(err);
     console.log(body);
+    console.log('*****');
     res.send(body)
   });
 });
