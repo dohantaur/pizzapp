@@ -1,0 +1,13 @@
+doctype html
+html(lang="en")
+  head
+    title Pizza App!
+  body
+    h1 GET ALL PIZZA
+    ul
+      each pizza in data
+        li
+          div= pizza.id  + ' : ' + pizza.name
+          form(action='/orders', method='POST')
+            input(type='hidden', value=pizza.id, name='id', id='id')
+            input(type='submit', value='commander')
