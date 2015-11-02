@@ -4,12 +4,14 @@ var app = express();
 var request = require('request');
 var bodyParser = require('body-parser');
 var redis = require('redis');
+var favicon = require('serve-favicon');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(favicon(__dirname + '/public/favicon.ico'));
 
 var client = redis.createClient();
 
