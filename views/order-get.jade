@@ -1,8 +1,15 @@
 extends ./layout.jade
 
 block content
-    h1= 'ORDER #' + order.id
-
-    div= 'Pizza: ' + order.pizza.name + ' (id:' + order.pizza.id + ')'
-    div= 'Prix: ' + order.pizza.price
-    div= 'Statut: ' + order.status
+    h1
+      span.glyphicon.glyphicon-ok  VOTRE COMMANDE
+    
+    div.row
+      div.col-lg-4
+        div.panel.panel-success
+          div.panel-heading
+            h3.panel-title= 'ORDER #' + order.id
+          div.panel-body
+            div= 'Pizza: ' + order.pizza.name + ' (#' + order.pizza.id + ')'
+            div= 'Prix: ' + order.pizza.price
+            div= 'Statut: ' + order.status
