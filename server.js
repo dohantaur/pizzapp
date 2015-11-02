@@ -17,9 +17,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('/pizzas', (req, res) => {
-	/*setTimeout( () => {
+	setTimeout( () => {
   		client.end();
-    }, 4000);*/
+    }, 4000);
     client.get("pizzas", (err, reply) => {
   		console.log('PIZZAS FROM REDIS:');
         var pizzas = JSON.parse(reply);
