@@ -36,8 +36,24 @@ app.post('/orders', (req, res) => {
   request.post({url: 'http://pizzapi.herokuapp.com/orders', body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
     if(err) return res.send(err);
     console.log(body);
-    res.render('order-get', {order: body});
+    res.render('order-get', {order: JSON.parse(body)});
   });
+});
+
+app.use(function(req, res, next){
+  res.status(404);
+  // respond with html page
+  if (req.accepts('html')) {
+    res.render('404', { url: req.url });
+    return;
+  }
+  // respond with json
+  if (req.accepts('json')) {
+    res.send({ error: 'Not found' });
+    return;
+  }
+  // default to plain-text. send()
+  res.type('txt').send('Not found');
 });
 
 app.listen(3000, () => {
