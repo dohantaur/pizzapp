@@ -1,0 +1,10 @@
+doctype html
+html(lang="en")
+  head
+    title Pizza App!
+  body
+    h1= ORDER #order.id
+	
+	div= 'Pizza: ' + order.pizza.name + ' (id:' + order.pizza.id + ')'
+	div= 'Prix: ' + order.pizza.price
+	div= 'Statut: ' + order.status
