@@ -9,10 +9,13 @@ block content
         li.list-group-item
           div.row
             div.col-lg-2
-              img(src='/' + pizza.name.toLowerCase() + '.jpg',class='img-responsive img-circle')
+              img(src='/' + pizza.name + '.jpg',class='img-responsive img-circle')
             div.col-lg-8
               h4= '#' + pizza.id  + ': ' + pizza.name
             div.col-lg-2
               form(action='/orders', method='POST')
                 input(type='hidden', value=pizza.id, name='id', id='id')
-                input(type='submit', value='Je la commande tout de suite !', class='btn btn-primary pull-right')
+                if isEnMaintenance
+                  input(type='submit', value='TU COMMANDES PAS !', disable, class='btn btn-danger pull-right')
+                else
+                  input(type='submit', value='Je la commande tout de suite !', class='btn btn-primary pull-right')

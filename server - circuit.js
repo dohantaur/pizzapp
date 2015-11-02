@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 var redis = require('redis');
 var favicon = require('serve-favicon');
 var path = require('path');
-var CircuitBreaker = require('circuit-breaker-js');
+var cbreak = require('circuit-breaker-js');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
@@ -16,31 +16,33 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(favicon(__dirname + '/public/favicon.ico'));
 
 var client = redis.createClient();
-var configBreaker = {
+var breaker = new cbreak({
     windowDuration: 300000,
-    numBuckets: 1,
-    timeoutDuration: 4000,
-    volumeTreshold: 1
-}
-
-var isEnMaintenance = false;
-var breaker = new CircuitBreaker(configBreaker);
-breaker.onCircuitOpen = function(metrics) {
-  console.log('CircuitBreaker: Ouvert ! ', metrics);
-  isEnMaintenance = true;
-};
-
-breaker.onCircuitClose = function(metrics) {
-  console.warn('CircuitBreaker: Fermé ! ', metrics);
-  isEnMaintenance = false;
-};
+    numBuckets: 3,
+    timeoutDuration: 5000
+});
 
 app.get('/', (req, res) => {
     res.render('index');
 });
 
 app.get('/pizzas', (req, res) => {
-	getPizzasFromCache(res);
+	// var timeout = setTimeout( () => {
+ //  		client.end();
+    // }, 4000);
+    client.get("pizzas", (err, reply) => {
+        if(err) {
+            failed(err);
+            return;
+        }
+  		console.log('PIZZAS FROM REDIS:');
+        var pizzas = JSON.parse(reply);
+  		console.log(pizzas);
+        // if(timeout) {
+        //     clearTimeout(timeout);
+        // }
+        res.render('pizzas-get', {pizzas: pizzas});
+    });
 });
 
 app.get('/orders/:id', (req, res) => {
@@ -57,25 +59,32 @@ app.get('/orders/:id', (req, res) => {
 });
 
 app.post('/orders', (req, res) => {
-    function command(success,failed){
+    function doReq(success,failed){
         request.post({url: 'http://pizzapi.herokuapp.com/orders', timeout: 4000, body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
-          if(err || result.statusCode == 503){
-              console.log('CircuitBreaker: failed');
-              failed();
-              res.render('503');
+          if(err || JSON.parse(body).id === "maintenance"){
+              client.get("pizzas", (err, reply) => {
+                  if(err) {
+                      failed(err);
+                      return;
+                  }
+            	  console.log('PIZZAS FROM REDIS:');
+                  var pizzas = JSON.parse(reply);
+            	  console.log(pizzas);
+                  res.render('pizzas-get', {pizzas: pizzas, isMaint: true});
+              });
               return;
           }
-          console.log('CircuitBreaker: success');
-          success();
-          res.render('order-get', {order: JSON.parse(body)})
+
+          console.log(body);
+          success(res.render('order-get', {order: JSON.parse(body)}));
         });
     }
 
     function fallback(){
-        console.log('CircuitBreaker: Dans le fallback')
-        getPizzasFromCache(res);
+        console.log('truc')
+        res.render('404');
     }
-    breaker.run(command,fallback);
+    breaker.run(doReq,fallback);
 });
 
 app.use(function(req, res, next){
@@ -97,20 +106,3 @@ app.use(function(req, res, next){
 app.listen(3000, () => {
   console.log('Listening on port 3000...')
 })
-
-function getPizzasFromCache(res, enmaintenance) {
-    // var timeout = setTimeout( () => {
- //  		client.end();
-    // }, 4000);
-    client.get("pizzas", (err, reply) => {
-        if(err) {
-            return;
-        }
-  		console.log('Redis: Liste des Pizzas récupérées');
-        var pizzas = JSON.parse(reply);
-        // if(timeout) {
-        //     clearTimeout(timeout);
-        // }
-        res.render('pizzas-get', {pizzas: pizzas, isEnMaintenance: isEnMaintenance});
-    });
-}

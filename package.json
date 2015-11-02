@@ -18,6 +18,7 @@
   "homepage": "https://github.com/dohantaur/pizzapp#readme",
   "dependencies": {
     "body-parser": "^1.14.1",
+    "circuit-breaker-js": "git+https://github.com/yammer/circuit-breaker-js.git",
     "express": "^4.13.3",
     "jade": "^1.11.0",
     "redis": "^2.3.0",
