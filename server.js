@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
   request('http://pizzapi.herokuapp.com', (err, result, body ) => {
     if(err) return res.send(err);
     console.log(body);
-    res.send(body)
+    res.render('index');
   });
 });
 
