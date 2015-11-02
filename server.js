@@ -19,7 +19,7 @@ app.get('/pizzas', (req, res) => {
   request('http://pizzapi.herokuapp.com/pizzas', (err, result, body ) => {
     if(err) return res.send(err);
     console.log(body);
-    res.send(body)
+    res.render('pizzas-get', {data: body});
   });
 });
 
