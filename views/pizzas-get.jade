@@ -1,8 +1,9 @@
 extends ./layout.jade
 
 block content
-    h1
-      span.glyphicon.glyphicon-cutlery  PIZZAS À LA CARTE
+    div.page-header
+      h1
+        span.glyphicon.glyphicon-cutlery  PIZZAS À LA CARTE
     ul.list-group
       each pizza in pizzas
         li.list-group-item
@@ -12,4 +13,4 @@ block content
             div.col-lg-2
               form(action='/orders', method='POST')
                 input(type='hidden', value=pizza.id, name='id', id='id')
-                input(type='submit', value='commander', class='btn btn-primary')
+                input(type='submit', value='commander', class='btn btn-primary pull-right')

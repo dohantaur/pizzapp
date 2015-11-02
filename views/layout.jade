@@ -8,6 +8,11 @@ html
   body
     nav.navbar.navbar-default
       div.container-fluid
-        a.navbar-brand(href='/') Pizza App
+        div.navbar-header
+          a.navbar-brand(href='/') Pizza App
+        div.collapse.navbar-collapse
+          ul.nav.navbar-nav
+            li
+              a(href='/pizzas') La carte
     div.container
       block content

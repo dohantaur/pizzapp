@@ -17,13 +17,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/pizzas', (req, res) => {
-	setTimeout( () => {
+	var timeout = setTimeout( () => {
   		client.end();
     }, 4000);
+    
     client.get("pizzas", (err, reply) => {
   		console.log('PIZZAS FROM REDIS:');
         var pizzas = JSON.parse(reply);
   		console.log(pizzas);
+        if(timeout) {
+            clearTimeout(timeout);
+        }
   		res.render('pizzas-get', {pizzas: pizzas});
     });
 });
