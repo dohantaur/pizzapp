@@ -3,28 +3,29 @@ var express = require('express');
 var app = express();
 var request = require('request');
 var bodyParser = require('body-parser');
+var redis = require('redis');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
+var client = redis.createClient();
+
 app.get('/', (req, res) => {
     res.render('index');
 });
 
 app.get('/pizzas', (req, res) => {
-  request.get({url: 'http://pizzapi.herokuapp.com/pizzas', timeout: 4000}, (err, result, body ) => {
-    if(err) {
-      if(err.code === 'ETIMEDOUT') {
-        return res.render('timeout');
-      } else {
-        return res.send(err);
-      }
-    }
-    console.log(JSON.parse(body));
-    res.render('pizzas-get', {data: JSON.parse(body)});
-  });
+	/*setTimeout( () => {
+  		client.end();
+    }, 4000);*/
+    client.get("pizzas", (err, reply) => {
+  		console.log('PIZZAS FROM REDIS:');
+        var pizzas = JSON.parse(reply);
+  		console.log(pizzas);
+  		res.render('pizzas-get', {pizzas: pizzas});
+    });
 });
 
 app.get('/orders/:id', (req, res) => {
