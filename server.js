@@ -28,7 +28,7 @@ app.get('/orders/:id', (req, res) => {
   request(`http://pizzapi.herokuapp.com/orders/${req.params.id}`, (err, result, body ) => {
     if(err) return res.send(err);
     console.log(body);
-    res.send(body)
+    res.render('order-get', {order: JSON.parse(body)});
   });
 });
 
