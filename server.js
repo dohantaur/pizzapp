@@ -1,3 +1,4 @@
+"use strics";
 var express = require('express');
 var app = express();
 var request = require('request');
@@ -9,32 +10,42 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 app.get('/', (req, res) => {
-  request('http://pizzapi.herokuapp.com', (err, result, body ) => {
-    if(err) return res.send(err);
-    console.log(body);
     res.render('index');
-  });
 });
 
 app.get('/pizzas', (req, res) => {
-  request('http://pizzapi.herokuapp.com/pizzas', (err, result, body ) => {
-    if(err) return res.send(err);
+  request.get({url: 'http://pizzapi.herokuapp.com/pizzas', timeout: 4000}, (err, result, body ) => {
+    if(err) {
+      if(err.code === 'ETIMEDOUT') {
+        return res.render('timeout');
+      } else {
+        return res.send(err);
+      }
+    }
     console.log(JSON.parse(body));
     res.render('pizzas-get', {data: JSON.parse(body)});
   });
 });
 
 app.get('/orders/:id', (req, res) => {
-  request(`http://pizzapi.herokuapp.com/orders/${req.params.id}`, (err, result, body ) => {
-    if(err) return res.send(err);
+  request.get({url: `http://pizzapi.herokuapp.com/orders/${req.params.id}`, timeout: 4000}, (err, result, body ) => {
+    if(err) {
+      if(err.code === 'ETIMEDOUT') {
+        return res.render('timeout');
+      }
+      return res.send(err);
+    }
     console.log(body);
     res.render('order-get', {order: JSON.parse(body)});
   });
 });
 
 app.post('/orders', (req, res) => {
-  request.post({url: 'http://pizzapi.herokuapp.com/orders', body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
-    if(err) return res.send(err);
+  request.post({url: 'http://pizzapi.herokuapp.com/orders', timeout: 4000, body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
+    if(err.code === 'ETIMEDOUT') {
+      return res.render('timeout');
+    }
+    return res.send(err);
     console.log(body);
     res.render('order-get', {order: JSON.parse(body)});
   });
