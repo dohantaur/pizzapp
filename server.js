@@ -19,10 +19,8 @@ var client = redis.createClient();
 
 var isEnMaintenance = false;
 var breaker = new CircuitBreaker({
-    windowDuration: 100000,
-    numBuckets: 10,
-    timeoutDuration: 5000,
-    errorThreshold: 20,
+    windowDuration: 10000,
+    numBuckets: 3,
     volumeThreshold: 2
 });
 
@@ -41,6 +39,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/pizzas', (req, res) => {
+  console.log('PLOP');
+  console.log(breaker.isOpen());
 	getPizzasFromCache(res);
 });
 
@@ -111,6 +111,6 @@ function getPizzasFromCache(res) {
         // if(timeout) {
         //     clearTimeout(timeout);
         // }
-        res.render('pizzas-get', {pizzas: pizzas, isEnMaintenance: isEnMaintenance});
+        res.render('pizzas-get', {pizzas: pizzas, isEnMaintenance: breaker.isOpen()});
     });
 }
