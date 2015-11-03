@@ -38,12 +38,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/pizzas', (req, res) => {
-<<<<<<< HEAD
-  console.log('PLOP');
-  console.log(breaker.isOpen());
-=======
-    librato.increment('GET /pizzas');
->>>>>>> 35367d1a4a1ca60e0f26bb1e5efcb4712d5693a4
+  librato.increment('GET /pizzas');
 	getPizzasFromCache(res);
 });
 
