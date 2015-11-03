@@ -146,9 +146,9 @@ breaker.onCircuitClose = function(metrics) {
 
 function checkBreaker(){
     if(breaker.isOpen()){
-        librato.increment('circuitBreakerIsOpen');
+        librato.measure('circuitBreaker', 0);
     } else {
-        librato.increment('circuitBreakerIsClosed');
+        librato.measure('circuitBreaker', 1);
     }
 }
 
