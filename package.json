@@ -25,5 +25,8 @@
     "redis": "^2.3.0",
     "request": "^2.65.0",
     "serve-favicon": "^2.3.0"
-  }
+  },
+  "engines": {
+    "node": ">=4.2.1"
+  },
 }
