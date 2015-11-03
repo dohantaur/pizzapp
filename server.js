@@ -6,10 +6,13 @@ var bodyParser = require('body-parser');
 var redis = require('redis');
 var favicon = require('serve-favicon');
 var path = require('path');
+var librato = require('librato-node');
 var CircuitBreaker = require('circuit-breaker-js');
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
+app.use(librato.middleware());
 app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -24,15 +27,10 @@ var breaker = new CircuitBreaker({
     volumeThreshold: 2
 });
 
-breaker.onCircuitOpen = function(metrics) {
-  console.log('CircuitBreaker: Ouvert ! ', metrics);
-  isEnMaintenance = true;
-};
+librato.configure({email: 'julian.licette@gmail.com', token: '0956806394fdc9b6a1314500b6d64a15c3623747de80ef21ade0a91a3d599c5d'});
+librato.start();
 
-breaker.onCircuitClose = function(metrics) {
-  console.warn('CircuitBreaker: Fermé ! ', metrics);
-  isEnMaintenance = false;
-};
+/***************************************************************/
 
 app.get('/', (req, res) => {
     res.render('index');
@@ -93,10 +91,6 @@ app.use(function(req, res, next){
   res.type('txt').send('Not found');
 });
 
-app.listen(3000, () => {
-  console.log('Listening on port 3000...')
-})
-
 function getPizzasFromCache(res) {
     // var timeout = setTimeout( () => {
     // }, 1000);
@@ -109,6 +103,25 @@ function getPizzasFromCache(res) {
         // if(timeout) {
         //     clearTimeout(timeout);
         // }
-        res.render('pizzas-get', {pizzas: pizzas, isEnMaintenance: isEnMaintenance});
+        res.render('pizzas-get', {pizzas: pizzas, isEnMaintenance: breaker.isOpen()});
     });
 }
+
+/*******************************************************************/
+app.listen(3000, () => {
+  console.log('Listening on port 3000...')
+})
+
+breaker.onCircuitOpen = function(metrics) {
+  console.log('CircuitBreaker: Ouvert ! ', metrics);
+  isEnMaintenance = true;
+};
+
+breaker.onCircuitClose = function(metrics) {
+  console.log('CircuitBreaker: Fermé ! ', metrics);
+  isEnMaintenance = false;
+};
+
+process.once('SIGINT', function() {
+  librato.stop(); // stop optionally takes a callback
+});
