@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(favicon(__dirname + '/public/favicon.ico'));
 
-var client = redis.createClient();
+var client = redis.createClient(process.env.REDIS_URL);
 
 var isEnMaintenance = false;
 var breaker = new CircuitBreaker({
