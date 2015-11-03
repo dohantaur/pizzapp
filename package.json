@@ -21,6 +21,7 @@
     "circuit-breaker-js": "git+https://github.com/yammer/circuit-breaker-js.git",
     "express": "^4.13.3",
     "jade": "^1.11.0",
+    "librato-node": "^4.0.2",
     "redis": "^2.3.0",
     "request": "^2.65.0",
     "serve-favicon": "^2.3.0"
