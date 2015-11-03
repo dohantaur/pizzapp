@@ -34,16 +34,19 @@ librato.start();
 
 app.get('/', (req, res) => {
     librato.increment('GET /');
+    checkBreaker();
     res.render('index');
 });
 
 app.get('/pizzas', (req, res) => {
   librato.increment('GET /pizzas');
-	getPizzasFromCache(res);
+  checkBreaker();
+  getPizzasFromCache(res);
 });
 
 app.get('/orders/:id', (req, res) => {
     librato.increment('GET /orders/:id');
+    checkBreaker();
     request.get({url: `http://pizzapi.herokuapp.com/orders/${req.params.id}`, timeout: 4000}, (err, result, body ) => {
         if(err) {
           if(err.code === 'ETIMEDOUT') {
@@ -58,6 +61,7 @@ app.get('/orders/:id', (req, res) => {
 
 app.post('/orders', (req, res) => {
     librato.increment('POST /orders');
+    checkBreaker();
     function command(success,failed){
         request.post({url: 'http://pizzapi.herokuapp.com/orders', timeout: 4000, body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
           if(err || result.statusCode == 503){
@@ -97,11 +101,13 @@ app.use(function(req, res, next){
 
 function redirect404(req,res){
     librato.increment('statusCode.404');
+    checkBreaker();
     res.render('404', { url: req.url });
 }
 
 function redirect503(req,res){
     librato.increment('statusCode.503');
+    checkBreaker();
     res.render('503');
 }
 function getPizzasFromCache(res) {
@@ -137,6 +143,14 @@ breaker.onCircuitClose = function(metrics) {
   isEnMaintenance = false;
   librato.increment('circuitBreakerIsClosed');
 };
+
+function checkBreaker(){
+    if(breaker.isOpen()){
+        librato.increment('circuitBreakerIsOpen');
+    } else {
+        librato.increment('circuitBreakerIsClosed');
+    }
+}
 
 process.once('SIGINT', function() {
   librato.stop(); // stop optionally takes a callback
