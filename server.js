@@ -33,14 +33,17 @@ librato.start();
 /***************************************************************/
 
 app.get('/', (req, res) => {
+    librato.increment('GET /');
     res.render('index');
 });
 
 app.get('/pizzas', (req, res) => {
+    librato.increment('GET /pizzas');
 	getPizzasFromCache(res);
 });
 
 app.get('/orders/:id', (req, res) => {
+    librato.increment('GET /orders/:id');
     request.get({url: `http://pizzapi.herokuapp.com/orders/${req.params.id}`, timeout: 4000}, (err, result, body ) => {
         if(err) {
           if(err.code === 'ETIMEDOUT') {
@@ -54,12 +57,13 @@ app.get('/orders/:id', (req, res) => {
 });
 
 app.post('/orders', (req, res) => {
+    librato.increment('POST /orders');
     function command(success,failed){
         request.post({url: 'http://pizzapi.herokuapp.com/orders', timeout: 4000, body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
           if(err || result.statusCode == 503){
               console.log('CircuitBreaker: failed');
               failed();
-              res.render('503');
+              redirect503(req,res);
               return;
           }
           console.log('CircuitBreaker: success');
@@ -79,7 +83,7 @@ app.use(function(req, res, next){
   res.status(404);
   // respond with html page
   if (req.accepts('html')) {
-    res.render('404', { url: req.url });
+    redirect404(req,res);
     return;
   }
   // respond with json
@@ -91,6 +95,15 @@ app.use(function(req, res, next){
   res.type('txt').send('Not found');
 });
 
+function redirect404(req,res){
+    librato.increment('statusCode.404');
+    res.render('404', { url: req.url });
+}
+
+function redirect503(req,res){
+    librato.increment('statusCode.503');
+    res.render('503');
+}
 function getPizzasFromCache(res) {
     // var timeout = setTimeout( () => {
     // }, 1000);
@@ -112,14 +125,17 @@ app.listen(3000, () => {
   console.log('Listening on port 3000...')
 })
 
+var openCount = 0, closedCount = 0;
 breaker.onCircuitOpen = function(metrics) {
   console.log('CircuitBreaker: Ouvert ! ', metrics);
   isEnMaintenance = true;
+  librato.increment('circuitBreakerIsOpen');
 };
 
 breaker.onCircuitClose = function(metrics) {
   console.log('CircuitBreaker: Fermé ! ', metrics);
   isEnMaintenance = false;
+  librato.increment('circuitBreakerIsClosed');
 };
 
 process.once('SIGINT', function() {
