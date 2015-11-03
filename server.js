@@ -19,10 +19,8 @@ var client = redis.createClient();
 
 var isEnMaintenance = false;
 var breaker = new CircuitBreaker({
-    windowDuration: 100000,
-    numBuckets: 10,
-    timeoutDuration: 5000,
-    errorThreshold: 20,
+    windowDuration: 10000,
+    numBuckets: 3,
     volumeThreshold: 2
 });
 
