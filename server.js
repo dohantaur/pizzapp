@@ -16,15 +16,16 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(favicon(__dirname + '/public/favicon.ico'));
 
 var client = redis.createClient();
-var configBreaker = {
-    windowDuration: 300000,
-    numBuckets: 1,
-    timeoutDuration: 4000,
-    volumeTreshold: 1
-}
 
 var isEnMaintenance = false;
-var breaker = new CircuitBreaker(configBreaker);
+var breaker = new CircuitBreaker({
+    windowDuration: 100000,
+    numBuckets: 10,
+    timeoutDuration: 5000,
+    errorThreshold: 20,
+    volumeThreshold: 2
+});
+
 breaker.onCircuitOpen = function(metrics) {
   console.log('CircuitBreaker: Ouvert ! ', metrics);
   isEnMaintenance = true;
@@ -98,10 +99,9 @@ app.listen(3000, () => {
   console.log('Listening on port 3000...')
 })
 
-function getPizzasFromCache(res, enmaintenance) {
+function getPizzasFromCache(res) {
     // var timeout = setTimeout( () => {
- //  		client.end();
-    // }, 4000);
+    // }, 1000);
     client.get("pizzas", (err, reply) => {
         if(err) {
             return;
