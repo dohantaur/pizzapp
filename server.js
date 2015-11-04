@@ -1,4 +1,4 @@
-"use strics";
+"use strict";
 var express = require('express');
 var app = express();
 var request = require('request');
@@ -9,8 +9,13 @@ var path = require('path');
 var librato = require('librato-node');
 var CircuitBreaker = require('circuit-breaker-js');
 
+if(! process.env.PIZZAPI_URL) {
+  process.env.PIZZAPI_URL = 'http://pizzapi.herokuapp.com';
+};
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
+
 
 app.use(librato.middleware());
 app.use(express.static('public'));
@@ -47,7 +52,7 @@ app.get('/pizzas', (req, res) => {
 app.get('/orders/:id', (req, res) => {
     librato.increment('GET /orders/:id');
     checkBreaker();
-    request.get({url: `http://pizzapi.herokuapp.com/orders/${req.params.id}`, timeout: 4000}, (err, result, body ) => {
+    request.get({url: `${process.env.PIZZAPI_URL}/orders/${req.params.id}`, timeout: 4000}, (err, result, body ) => {
         if(err) {
           if(err.code === 'ETIMEDOUT') {
             return res.render('timeout');
@@ -63,7 +68,7 @@ app.post('/orders', (req, res) => {
     librato.increment('POST /orders');
     checkBreaker();
     function command(success,failed){
-        request.post({url: 'http://pizzapi.herokuapp.com/orders', timeout: 4000, body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
+        request.post({url: `${process.env.PIZZAPI_URL}/orders`, timeout: 4000, body: JSON.stringify({id: parseInt(req.body.id)})}, (err, result, body ) => {
           if(err || result.statusCode == 503){
               console.log('CircuitBreaker: failed');
               failed();
