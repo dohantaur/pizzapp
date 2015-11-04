@@ -1,6 +1,6 @@
 var request = require('request');
 var redis = require("redis");
-var client = redis.createClient();
+var client = redis.createClient(process.env.REDIS_URL);
 
 if(! process.env.PIZZAPI_URL) {
   process.env.PIZZAPI_URL = 'http://pizzapi.herokuapp.com';
