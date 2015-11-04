@@ -12,6 +12,7 @@ var CircuitBreaker = require('circuit-breaker-js');
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
+
 app.use(librato.middleware());
 app.use(express.static('public'));
 app.use(bodyParser.json());
