@@ -1,2 +1,1 @@
-worker: node cache.js
-web: node server.js
+web: node maintenance.js
